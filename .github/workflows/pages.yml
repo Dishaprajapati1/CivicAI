@@ -1,0 +1,38 @@
+name: Publish CivicAI to GitHub Pages
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Prepare the website files
+        run: |
+          mkdir _site
+          cp index.html styles.css app.js _site/
+      - name: Upload website files
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site/
+      - name: Publish website
+        id: deployment
+        uses: actions/deploy-pages@v4
